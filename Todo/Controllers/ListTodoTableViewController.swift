@@ -81,10 +81,12 @@ class ListTodoTableViewController: UITableViewController {
             cell.onButtonTouched = {
                 (cell) in guard let indexPath = tableView.indexPath(for: cell) else { return }
                 let todo = self.todos[indexPath.row]
-                todo.completed = true
-                self.doneTodos.append(todo)
-                self.todos.remove(at:indexPath.row)
-                CoreDataHelper.saveTodo()
+                if todo.completed == false {
+                    todo.completed = true
+                    self.doneTodos.append(todo)
+                    self.todos.remove(at:indexPath.row)
+                    CoreDataHelper.saveTodo()
+                }
             }
         
             cell.todoDescriptionLabel.text = todo.content

@@ -80,7 +80,11 @@ class ListTodoTableViewController: UITableViewController {
         
             cell.onButtonTouched = {
                 (cell) in guard let indexPath = tableView.indexPath(for: cell) else { return }
-                print("hi")
+                let todo = self.todos[indexPath.row]
+                todo.completed = true
+                self.doneTodos.append(todo)
+                self.todos.remove(at:indexPath.row)
+                CoreDataHelper.saveTodo()
             }
         
             cell.todoDescriptionLabel.text = todo.content
@@ -111,14 +115,21 @@ class ListTodoTableViewController: UITableViewController {
         }
         switch identifier {
         case "displayTodo":
+            
             guard let indexPath = tableView.indexPathForSelectedRow else {return}
+            switch indexPath.section {
+            case 0:
+                let todo = todos[indexPath.row]
+                let destination = segue.destination as! DisplayTodoViewController
+                destination.todo = todo
             
-            let todo = todos[indexPath.row]
-            
-            let destination = segue.destination as! DisplayTodoViewController
-            
-            destination.todo = todo
-            
+            case 1:
+                let completedTodo = doneTodos[indexPath.row]
+                let destination = segue.destination as! DisplayTodoViewController
+                destination.todo = completedTodo
+            default:
+                break
+            }
         case "addTodo":
             print("Add Todo")
         default:

@@ -14,8 +14,10 @@ class ListTodoTableViewCell: UITableViewCell {
     @IBOutlet weak var todoTimeStampLabel: UILabel!
     @IBOutlet weak var todoDescriptionLabel: UILabel!
     @IBOutlet weak var todoCompleteButton: UIButton!
+    var onButtonTouched: ((UITableViewCell) -> Void)? = nil
     
-    @IBAction func todoCompleteButtonTapped(_ sender: UIButton) {
-        print("tapped")
+    @IBAction func buttonTouched(_ sender: UIButton) {
+        onButtonTouched?(self)
     }
+    
 }

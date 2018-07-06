@@ -16,11 +16,18 @@ class ListTodoTableViewController: UITableViewController {
         }
     }
     
+    var doneTodos = [Todo]() {
+        didSet {
+            tableView.reloadData()
+        }
+    }
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        todos = CoreDataHelper.retrieveTodos()
+        todos = CoreDataHelper.retrieveTodos(completed: false)
+        doneTodos = CoreDataHelper.retrieveTodos(completed: true)
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -29,9 +36,16 @@ class ListTodoTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            CoreDataHelper.deleteTodo(todos[indexPath.row])
-            
-            todos = CoreDataHelper.retrieveTodos()
+            switch indexPath.section {
+            case 0:
+                CoreDataHelper.deleteTodo(todos[indexPath.row])
+                todos = CoreDataHelper.retrieveTodos(completed: false)
+            case 1:
+                CoreDataHelper.deleteTodo(doneTodos[indexPath.row])
+                doneTodos = CoreDataHelper.retrieveTodos(completed: true)
+            default:
+                print("what?")
+            }
         }
     }
     
@@ -46,21 +60,50 @@ class ListTodoTableViewController: UITableViewController {
         }
     }
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return todos.count
+        switch section {
+        case 0:
+            return todos.count
+        case 1:
+            return doneTodos.count
+        default:
+            return 0
+        }
     }
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "listTodoTableViewCell", for: indexPath) as! ListTodoTableViewCell
-        let todo = todos[indexPath.row]
         
-        cell.todoDescriptionLabel.text = todo.content
-        cell.todoTitleLabel.text = todo.title
-        cell.todoTimeStampLabel.text = todo.modificationTime?.convertToString() ?? "unknown"
-        return cell
+        switch indexPath.section {
+        case 0:
+            let todo = todos[indexPath.row]
+        
+            cell.onButtonTouched = {
+                (cell) in guard let indexPath = tableView.indexPath(for: cell) else { return }
+                print("hi")
+            }
+        
+            cell.todoDescriptionLabel.text = todo.content
+            cell.todoTitleLabel.text = todo.title
+            cell.todoTimeStampLabel.text = todo.modificationTime?.convertToString() ?? "unknown"
+            return cell
+            
+        case 1:
+            let completedTodo = doneTodos[indexPath.row]
+            
+            cell.todoDescriptionLabel.text = completedTodo.content
+            cell.todoTitleLabel.text = completedTodo.title
+            cell.todoTimeStampLabel.text = completedTodo.modificationTime?.convertToString() ?? "unknown"
+            return cell
+            
+        default:
+            return UITableViewCell()
+        }
     }
+    
     @IBAction func unwindWithSegue(_ segue: UIStoryboardSegue) {
-        todos = CoreDataHelper.retrieveTodos()
+        todos = CoreDataHelper.retrieveTodos(completed: false)
+        doneTodos = CoreDataHelper.retrieveTodos(completed: true)
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let identifier = segue.identifier else {

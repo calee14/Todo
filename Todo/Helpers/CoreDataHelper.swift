@@ -43,7 +43,7 @@ struct CoreDataHelper {
         saveTodo()
     }
     
-    static func retrieveTodos() -> [Todo] {
+    static func retrieveTodos(completed: Bool) -> [Todo] {
         
         let fetchRequest = NSFetchRequest<Todo>(entityName: "Todo")
         let sort = NSSortDescriptor(key: #keyPath(Todo.modificationTime), ascending: false)
@@ -51,7 +51,13 @@ struct CoreDataHelper {
         
         do {
             let results = try context.fetch(fetchRequest)
-            return results
+            var resultsFiltered = [Todo]()
+            for i in results {
+                if i.completed == completed {
+                    resultsFiltered.append(i)
+                }
+            }
+            return resultsFiltered
         } catch let error {
             print("Could not fetch \(error.localizedDescription)")
             return [Todo]()
